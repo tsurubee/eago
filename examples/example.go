@@ -5,19 +5,16 @@ import (
 	"log"
 )
 
-type Variables []float64
-
 func objectiveFunc(x []float64) float64 {
-	return x[0] * x[0] * x[1] * x[1]
+	return x[0] * x[0] + x[1] * x[1]
 }
 
 func main() {
-	pso := eago.PSO{
-		NParticle: 3,
-		NStep: 10,
-		Min: -5,
-		Max: 5,
-	}
+	pso := eago.NewDefaultPSO()
+	pso.NParticle =  2
+	pso.NStep = 3
+	pso.Min = -10
+	pso.Max = 10
 
 	if err := pso.Minimize(objectiveFunc, 2); err != nil {
 		log.Fatal(err)
