@@ -11,9 +11,9 @@ func objectiveFunc(x []float64) float64 {
 
 func main() {
 	pso := eago.NewDefaultPSO()
-	pso.NParticle =  2
-	pso.NStep = 3
-	pso.Min = -10
+	pso.NParticle =  5
+	pso.NStep = 20
+	pso.Min = -20
 	pso.Max = 10
 
 	if err := pso.Minimize(objectiveFunc, 2); err != nil {
