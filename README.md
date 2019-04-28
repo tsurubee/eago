@@ -58,6 +58,10 @@ Step  18: Fitness=0.013 Position=[-0.111 0.023]
 Step  19: Fitness=0.008 Position=[-0.083 -0.031]
 ```
 
+## Implemented algorithms
+
+- Particle swarm optimization
+
 ## License
 
 [MIT](https://github.com/tsurubee/eago/blob/master/LICENSE)
