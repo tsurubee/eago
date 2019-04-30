@@ -60,6 +60,8 @@ Step  19: Fitness=0.008 Position=[-0.083 -0.031]
 
 ## Implemented algorithms
 
+- Genetic algorithm
+
 - Particle swarm optimization
 
 ## License
