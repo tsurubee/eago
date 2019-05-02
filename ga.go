@@ -3,9 +3,9 @@ package eago
 import "fmt"
 
 type GA struct {
-	GAConfig    *GAConfig
+	GAConfig
+	//Selector
 	Population  Population
-	Generations uint
 	Best        Individual
 }
 
@@ -15,16 +15,14 @@ type GAConfig struct {
 	MutationRate   float64
 }
 
-type Individual struct {
-	Chromosome Genome
-	Fitness    float64
+type Population struct {
+	Individuals Individuals
+	Generations uint
 }
-
-type Population []Individual
 
 func NewGA() *GA {
 	return &GA{
-		GAConfig: &GAConfig{
+		GAConfig: GAConfig{
 			PopulationSize: 10,
 			NGenerations:   10,
 			MutationRate:   0.05,
@@ -32,15 +30,22 @@ func NewGA() *GA {
 	}
 }
 
-func (ga *GA) initPopulation(g Genome) Population {
-	pop := make(Population, ga.GAConfig.PopulationSize)
-	for i := range pop {
-		pop[i].Chromosome = g.Initialization()
+func (ga *GA) initPopulation(g Genome) {
+	indi := make(Individuals, ga.PopulationSize)
+	for i := range indi {
+		indi[i].Chromosome = g.Initialization()
+		indi[i].Fitness    = indi[i].Chromosome.Fitness()
 	}
-	return pop
+	ga.Population.Generations = 0
+	ga.Population.Individuals = indi
+	ga.Population.Individuals.SortByFitness()
 }
 
-func (ga *GA) Run(g Genome) {
-	pop := ga.initPopulation(g)
-	fmt.Println(pop)
+func (ga *GA) Minimize(g Genome) {
+	ga.initPopulation(g)
+	fmt.Println(ga.Population)
+
+	for i := uint(0); i < ga.NGenerations; i++ {
+		//evolve
+	}
 }
