@@ -7,7 +7,7 @@ import (
 type Variables []float64
 
 func (V Variables) Initialization() eago.Genome {
-	return Variables(eago.InitFloatVector(2, 10, -10))
+	return Variables(eago.InitFloatVector(2, 20, -20))
 }
 
 func (V Variables) Fitness() float64 {
@@ -15,11 +15,11 @@ func (V Variables) Fitness() float64 {
 }
 
 func (V Variables) Mutation() {
-	eago.MutateNormalFloat(V, 0.8)
+	eago.AddNormalFloat(V, 0.5)
 }
 
-func (V Variables) Crossover(X eago.Genome) {
-	eago.WeightedAverage(V, X.(Variables))
+func (V Variables) Crossover(X eago.Genome) eago.Genome {
+	return Variables(eago.BLXalpha(V, X.(Variables), 0.3))
 }
 
 func main() {

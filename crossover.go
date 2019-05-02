@@ -3,13 +3,17 @@ package eago
 import (
 	"time"
 	"math/rand"
+	"math"
 )
 
-func WeightedAverage(i1 []float64, i2 []float64) {
+func BLXalpha(x1 []float64, x2 []float64, alpha float64) []float64 {
 	rand.Seed(time.Now().UnixNano())
-	for i := range i1 {
-		ratio := rand.Float64()
-		i1[i] = ratio*i1[i] + (1-ratio)*i2[i]
-		i2[i] = (1-ratio)*i1[i] + ratio*i2[i]
+	child := make([]float64, len(x1))
+	for i := range x1 {
+		dx := math.Abs(x1[i] - x2[i])
+		min := math.Min(x1[i], x2[i]) - alpha*dx
+		max := math.Max(x1[i], x2[i]) + alpha*dx
+		child[i] = min + rand.Float64()*(max - min)
 	}
+	return child
 }
