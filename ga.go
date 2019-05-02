@@ -10,8 +10,9 @@ import (
 type GA struct {
 	GAConfig
 	Population
-	Selector     Selector
-	BestSolution Individual
+	Selector       Selector
+	BestIndividual Individual
+	PrintCallBack  func()
 }
 
 type GAConfig struct {
@@ -26,16 +27,11 @@ type Population struct {
 	Generations uint
 }
 
-func NewGA() *GA {
+func NewGA(gaConfig GAConfig) *GA {
 	return &GA{
-		GAConfig: GAConfig{
-			PopulationSize: 5,
-			NGenerations:   5,
-			CrossoverRate:  0.8,
-			MutationRate:   0.01,
-		},
+		GAConfig: gaConfig,
 		Selector: Tournament{
-			NSelection: 2,
+			NContestants: 2,
 		},
 	}
 }
@@ -49,7 +45,7 @@ func (ga *GA) initPopulation(g Genome) {
 	ga.Population.Generations = 0
 	ga.Population.Individuals = indi
 	ga.Population.Individuals.SortByFitness()
-	ga.BestSolution = ga.Population.Individuals[0]
+	ga.BestIndividual = ga.Population.Individuals[0]
 }
 
 func (ga *GA) evolve() error {
@@ -60,15 +56,16 @@ func (ga *GA) evolve() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	for i := range offSprings {
-		fmt.Println(i)
 		if i == len(selected)-1 {
-			offSprings[i] = selected[i]
+			offSprings[i] = selected[i].Clone()
 		} else {
 			if rand.Float64() < ga.CrossoverRate {
-				selected[i].Chromosome.Crossover(selected[i+1].Chromosome)
-				offSprings[i] = selected[i]
+				offSprings[i].Chromosome = selected[i].Chromosome.Crossover(selected[i+1].Chromosome)
 				offSprings[i].Fitness = offSprings[i].Chromosome.Fitness()
+			} else {
+				offSprings[i] = selected[i].Clone()
 			}
 		}
 		if rand.Float64() < ga.MutationRate {
@@ -79,26 +76,28 @@ func (ga *GA) evolve() error {
 
 	offSprings.SortByFitness()
 	ga.updateBest(offSprings[0])
-	ga.Population.Individuals = offSprings
+	ga.Population.Individuals = offSprings.Clone()
 	return nil
 }
 
 func (ga *GA) updateBest(indi Individual) {
-	if ga.BestSolution.Fitness > indi.Fitness {
-		ga.BestSolution = indi
+	if ga.BestIndividual.Fitness > indi.Fitness {
+		ga.BestIndividual = indi.Clone()
 	}
 }
 
 func (ga *GA) Minimize(g Genome) error {
 	ga.initPopulation(g)
-	fmt.Println(ga.Population)
 
-	for i := uint(0); i < ga.NGenerations; i++ {
+	for i := uint(1); i <= ga.NGenerations; i++ {
 		if err := ga.evolve(); err != nil {
 			return err
 		}
-		fmt.Printf("Best: %v(%v)", ga.BestSolution.Chromosome, ga.BestSolution.Fitness)
+		if ga.PrintCallBack != nil {
+			ga.PrintCallBack()
+		} else {
+			fmt.Printf("Generation %3d: Fitness=%.3f Solution=%.3f\n", i, ga.BestIndividual.Fitness, ga.BestIndividual.Chromosome)
+		}
 	}
-
 	return nil
 }

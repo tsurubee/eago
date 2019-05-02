@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/tsurubee/eago"
+	"log"
 )
 
 type Variables []float64
@@ -23,7 +24,14 @@ func (V Variables) Crossover(X eago.Genome) eago.Genome {
 }
 
 func main() {
-	ga := eago.NewGA()
 	var v Variables
-	ga.Minimize(v)
+	ga := eago.NewGA(eago.GAConfig{
+		PopulationSize: 30,
+		NGenerations:   20,
+		CrossoverRate:  0.8,
+		MutationRate:   0.01,
+	})
+	if err := ga.Minimize(v); err != nil {
+		log.Fatal(err)
+	}
 }
