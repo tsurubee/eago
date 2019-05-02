@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/tsurubee/eago"
 )
 
@@ -16,23 +15,15 @@ func (V Variables) Fitness() float64 {
 }
 
 func (V Variables) Mutation() {
-
+	eago.MutateNormalFloat(V, 0.8)
 }
 
-func (V Variables) Crossover() eago.Genome {
-	var v Variables
-	return v
-}
-
-func (V Variables) Clone() eago.Genome {
-	var v Variables
-	return v
+func (V Variables) Crossover(X eago.Genome) {
+	eago.WeightedAverage(V, X.(Variables))
 }
 
 func main() {
-	fmt.Println("Hello!")
 	ga := eago.NewGA()
-
 	var v Variables
 	ga.Minimize(v)
 }
