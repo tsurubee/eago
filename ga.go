@@ -20,6 +20,7 @@ type GAConfig struct {
 	NGenerations   uint
 	CrossoverRate  float64
 	MutationRate   float64
+	ParallelEval   bool
 }
 
 type Population struct {
