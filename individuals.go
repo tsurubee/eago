@@ -9,11 +9,15 @@ type Individuals []Individual
 type Individual struct {
 	Chromosome Genome
 	Fitness    float64
+	Evaluated  bool
 }
 
 func (indis Individuals) Evaluate() {
 	for i := range indis {
-		indis[i].Fitness = indis[i].Chromosome.Fitness()
+		if !indis[i].Evaluated {
+			indis[i].Fitness   = indis[i].Chromosome.Fitness()
+			indis[i].Evaluated = true
+		}
 	}
 }
 
