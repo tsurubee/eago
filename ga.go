@@ -38,13 +38,13 @@ func NewGA(gaConfig GAConfig) *GA {
 }
 
 func (ga *GA) initPopulation(g Genome) {
-	indi := make(Individuals, ga.PopulationSize)
-	for i := range indi {
-		indi[i].Chromosome = g.Initialization()
-		indi[i].Fitness    = indi[i].Chromosome.Fitness()
+	indis := make(Individuals, ga.PopulationSize)
+	for i := range indis {
+		indis[i].Chromosome = g.Initialization()
+		indis[i].Fitness    = indis[i].Chromosome.Fitness()
 	}
 	ga.Population.Generations = 0
-	ga.Population.Individuals = indi
+	ga.Population.Individuals = indis
 	ga.Population.Individuals.SortByFitness()
 	ga.BestIndividual = ga.Population.Individuals[0]
 }
