@@ -11,6 +11,12 @@ type Individual struct {
 	Fitness    float64
 }
 
+func (indis Individuals) Evaluate() {
+	for i := range indis {
+		indis[i].Fitness = indis[i].Chromosome.Fitness()
+	}
+}
+
 func (indis Individuals) SortByFitness() {
 	var less = func(i, j int) bool { return indis[i].Fitness < indis[j].Fitness }
 	sort.Slice(indis, less)
