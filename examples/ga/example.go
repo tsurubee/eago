@@ -41,6 +41,7 @@ func main() {
 		NGenerations:   20,
 		CrossoverRate:  0.8,
 		MutationRate:   0.01,
+		ParallelEval:   true,
 	})
 	if err := ga.Minimize(v); err != nil {
 		log.Fatal(err)
