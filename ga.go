@@ -42,7 +42,7 @@ func (ga *GA) initPopulation(g Genome) {
 	for i := range indis {
 		indis[i].Chromosome = g.Initialization()
 	}
-	indis.Evaluate()
+	indis.Evaluate(ga.ParallelEval)
 	ga.Population.Generations = 0
 	ga.Population.Individuals = indis
 	ga.Population.Individuals.SortByFitness()
@@ -73,7 +73,7 @@ func (ga *GA) evolve() error {
 		}
 	}
 
-	offSprings.Evaluate()
+	offSprings.Evaluate(ga.ParallelEval)
 	offSprings.SortByFitness()
 	ga.updateBest(offSprings[0])
 	ga.Population.Individuals = offSprings.Clone()
