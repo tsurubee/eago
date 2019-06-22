@@ -41,8 +41,8 @@ func (ga *GA) initPopulation(g Genome) {
 	indis := make(Individuals, ga.PopulationSize)
 	for i := range indis {
 		indis[i].Chromosome = g.Initialization()
-		indis[i].Fitness    = indis[i].Chromosome.Fitness()
 	}
+	indis.Evaluate()
 	ga.Population.Generations = 0
 	ga.Population.Individuals = indis
 	ga.Population.Individuals.SortByFitness()
@@ -64,17 +64,16 @@ func (ga *GA) evolve() error {
 		} else {
 			if rand.Float64() < ga.CrossoverRate {
 				offSprings[i].Chromosome = selected[i].Chromosome.Crossover(selected[i+1].Chromosome)
-				offSprings[i].Fitness = offSprings[i].Chromosome.Fitness()
 			} else {
 				offSprings[i] = selected[i].Clone()
 			}
 		}
 		if rand.Float64() < ga.MutationRate {
 			offSprings[i].Chromosome.Mutation()
-			offSprings[i].Fitness = offSprings[i].Chromosome.Fitness()
 		}
 	}
 
+	offSprings.Evaluate()
 	offSprings.SortByFitness()
 	ga.updateBest(offSprings[0])
 	ga.Population.Individuals = offSprings.Clone()
