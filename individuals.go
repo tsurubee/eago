@@ -2,7 +2,7 @@ package eago
 
 import (
 	"sort"
-	"github.com/golang/sync/errgroup"
+	"sync"
 )
 
 type Individuals []Individual
@@ -14,19 +14,20 @@ type Individual struct {
 }
 
 func (indis Individuals) Evaluate(parallel bool) {
+	var wg sync.WaitGroup
 	if !parallel {
 		for i := range indis {
 			indis[i].Evaluate()
 		}
 	} else {
-		var g errgroup.Group
 		for i := range indis {
-			g.Go(func() error {
+			wg.Add(1)
+			go func(i int) {
 				indis[i].Evaluate()
-				return nil
-			})
+				wg.Done()
+			}(i)
 		}
-		g.Wait()
+		wg.Wait()
 	}
 }
 
