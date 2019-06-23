@@ -23,8 +23,8 @@ func (indis Individuals) Evaluate(parallel bool) {
 		for i := range indis {
 			wg.Add(1)
 			go func(i int) {
+				defer wg.Done()
 				indis[i].Evaluate()
-				wg.Done()
 			}(i)
 		}
 		wg.Wait()
