@@ -20,6 +20,7 @@ type GAConfig struct {
 	NGenerations   uint
 	CrossoverRate  float64
 	MutationRate   float64
+	ParallelEval   bool
 }
 
 type Population struct {
@@ -37,13 +38,13 @@ func NewGA(gaConfig GAConfig) *GA {
 }
 
 func (ga *GA) initPopulation(g Genome) {
-	indi := make(Individuals, ga.PopulationSize)
-	for i := range indi {
-		indi[i].Chromosome = g.Initialization()
-		indi[i].Fitness    = indi[i].Chromosome.Fitness()
+	indis := make(Individuals, ga.PopulationSize)
+	for i := range indis {
+		indis[i].Chromosome = g.Initialization()
 	}
+	indis.Evaluate(ga.ParallelEval)
 	ga.Population.Generations = 0
-	ga.Population.Individuals = indi
+	ga.Population.Individuals = indis
 	ga.Population.Individuals.SortByFitness()
 	ga.BestIndividual = ga.Population.Individuals[0]
 }
@@ -63,17 +64,16 @@ func (ga *GA) evolve() error {
 		} else {
 			if rand.Float64() < ga.CrossoverRate {
 				offSprings[i].Chromosome = selected[i].Chromosome.Crossover(selected[i+1].Chromosome)
-				offSprings[i].Fitness = offSprings[i].Chromosome.Fitness()
 			} else {
 				offSprings[i] = selected[i].Clone()
 			}
 		}
 		if rand.Float64() < ga.MutationRate {
 			offSprings[i].Chromosome.Mutation()
-			offSprings[i].Fitness = offSprings[i].Chromosome.Fitness()
 		}
 	}
 
+	offSprings.Evaluate(ga.ParallelEval)
 	offSprings.SortByFitness()
 	ga.updateBest(offSprings[0])
 	ga.Population.Individuals = offSprings.Clone()
