@@ -15,11 +15,11 @@ func InitFloatVector(n int, upperLimit, lowerLimit float64) []float64 {
 	return vector
 }
 
-func InitRGBAImage(img *image.RGBA) *image.RGBA {
+func InitRGBAImage(img *image.RGBA) image.RGBA {
 	rand.Seed(time.Now().UnixNano())
 	pix := make([]uint8, len(img.Pix))
 	rand.Read(pix)
-	return &image.RGBA{
+	return image.RGBA{
 		Pix:    pix,
 		Stride: img.Stride,
 		Rect:   img.Rect,
