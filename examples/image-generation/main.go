@@ -11,28 +11,38 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"time"
 )
+
+var targetPath = "./gopher.png"
 
 type Image image.RGBA
 
 func (I Image) Initialization() eago.Genome {
-	return Image(eago.InitRGBAImage(loadImage("./monalisa.png")))
+	return Image(eago.InitRGBAImage(loadImage(targetPath)))
 }
 
 func (I Image) Fitness() float64 {
-	return imageSimilarity(Image(copyImage(loadImage("./monalisa.png"))), I)
+	return imageSimilarity(Image(copyImage(loadImage(targetPath))), I)
 }
 
 func (I Image) Mutation() {
-	//eago.AddNormalFloat(I, 0.5)
+	mutationRate := 0.0005
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < len(I.Pix); i++ {
+		if rand.Float64() < mutationRate {
+			I.Pix[i] = uint8(rand.Intn(255))
+		}
+	}
 }
 
 func (I Image) Crossover(X eago.Genome) eago.Genome {
+	rand.Seed(time.Now().UnixNano())
 	pix := make([]uint8, len(I.Pix))
-	child := image.RGBA{
-			Pix:    pix,
-			Stride: I.Stride,
-			Rect:   I.Rect,
+	child := &image.RGBA{
+		Pix:    pix,
+		Stride: I.Stride,
+		Rect:   I.Rect,
 	}
 	mid := rand.Intn(len(I.Pix))
 	for i := 0; i < len(I.Pix); i++ {
@@ -43,7 +53,7 @@ func (I Image) Crossover(X eago.Genome) eago.Genome {
 		}
 
 	}
-	return Image(child)
+	return Image(copyImage(child))
 }
 
 func (I Image) PrintImage()  {
@@ -61,7 +71,7 @@ func imageSimilarity(i1, i2 Image) float64 {
 
 func euclideanDistance(x, y uint8) float64 {
 	difference := float64(x - y)
-	return math.Sqrt(difference * difference)
+	return difference * difference
 }
 
 func copyImage(img *image.RGBA) image.RGBA {
@@ -72,8 +82,17 @@ func copyImage(img *image.RGBA) image.RGBA {
 	}
 }
 
+
 func createRGBAImage(img Image) image.RGBA {
 	return image.RGBA{
+		Pix:    img.Pix,
+		Stride: img.Stride,
+		Rect:   img.Rect,
+	}
+}
+
+func NRGBAtoRGBA(img *image.NRGBA) *image.RGBA {
+	return &image.RGBA{
 		Pix:    img.Pix,
 		Stride: img.Stride,
 		Rect:   img.Rect,
@@ -91,7 +110,16 @@ func loadImage(filePath string) *image.RGBA {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return img.(*image.RGBA)
+	return NRGBAtoRGBA(img.(*image.NRGBA))
+}
+
+func saveImage(filePath string, rgba image.RGBA) {
+	imgFile, err := os.Create(filePath)
+	defer imgFile.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	png.Encode(imgFile, rgba.SubImage(rgba.Rect))
 }
 
 func printImage(img image.Image) {
@@ -103,15 +131,27 @@ func printImage(img image.Image) {
 
 func main() {
 	var img Image
+	target := loadImage(targetPath)
+	printImage(target.SubImage(target.Rect))
+	start := time.Now()
+
 	ga := eago.NewGA(eago.GAConfig{
-		PopulationSize: 100,
-		NGenerations:   10,
-		CrossoverRate:  0.8,
-		MutationRate:   0.01,
+		PopulationSize: 600,
+		NGenerations:   20000,
+		CrossoverRate:  0.9,
+		MutationRate:   0.9,
 		ParallelEval:   true,
 	})
+	ga.Selector = eago.Tournament{
+		NContestants: 40,
+	}
 	ga.PrintCallBack = func() {
-		ga.BestIndividual.Chromosome.(Image).PrintImage()
+		if ga.Generations % 100 == 0 {
+			sofar := time.Since(start)
+			fmt.Printf("Generation %3d | Elapsed time: %s | Fitness=%.3f\n", ga.Generations, sofar, ga.BestIndividual.Fitness)
+			ga.BestIndividual.Chromosome.(Image).PrintImage()
+			saveImage(fmt.Sprintf("./results/gopher_%v.png", ga.Generations), createRGBAImage(ga.BestIndividual.Chromosome.(Image)))
+		}
 	}
 	if err := ga.Minimize(img); err != nil {
 		log.Fatal(err)
